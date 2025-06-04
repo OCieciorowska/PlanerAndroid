@@ -75,8 +75,10 @@ class PlanerViewModel : ViewModel() {
     }
 
     fun deleteTask(task: Tasks) {
-        db.collection("tasks").document(task.id).delete()
-            .addOnSuccessListener { loadTasks() }
+        db.collection("tasks").document(task.id).delete().addOnSuccessListener {
+            loadTasks()
+        }
     }
+
 
 }
