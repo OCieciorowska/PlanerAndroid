@@ -79,16 +79,20 @@ class PlanerViewModel : ViewModel() {
     }
 
     fun toggleTask(task: Tasks) {
-        task.isCompleted = !task.isCompleted
-        db.collection("tasks").document(task.id).set(task)
+        val updatedTask = task.copy(isCompleted = !task.isCompleted)
+        db.collection("tasks").document(updatedTask.id).set(updatedTask)
         loadTasks()
     }
+
 
     fun deleteTask(task: Tasks) {
         db.collection("tasks").document(task.id).delete().addOnSuccessListener {
             loadTasks()
         }
+
     }
+
+
 
 
 }

@@ -7,13 +7,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.planer.viewmodel.PlanerViewModel
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 
+import android.widget.CalendarView
+
+import androidx.compose.ui.viewinterop.AndroidView
+
+
+
+/*
 @SuppressLint("SimpleDateFormat")
 @Composable
 fun CalendarScreen(navController: NavController, viewModel: PlanerViewModel) {
@@ -52,6 +63,76 @@ fun CalendarScreen(navController: NavController, viewModel: PlanerViewModel) {
         ) {
             Text("Data: $selectedDate")
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text("Zadania na $selectedDate:", style = MaterialTheme.typography.titleMedium)
+
+        if (filteredTasks.isEmpty()) {
+            Text(
+                "Brak zadań w tym dniu.",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        } else {
+            filteredTasks.forEach { task ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp)
+                        .clickable { viewModel.toggleTask(task) },
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(task.title, style = MaterialTheme.typography.titleSmall)
+                        Text(task.description, style = MaterialTheme.typography.bodyMedium)
+                        Text("Godzina: ${task.time}", style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+            }
+        }
+    }
+}
+
+fun today(): String {
+    val sdf = SimpleDateFormat("yyyy-MM-dd")
+    return sdf.format(Date())
+}
+*/
+
+@SuppressLint("SimpleDateFormat")
+@Composable
+fun CalendarScreen(navController: NavController, viewModel: PlanerViewModel) {
+    val tasks by viewModel.tasks.collectAsState()
+    var selectedDate by remember { mutableStateOf(today()) }
+
+    val sdf = SimpleDateFormat("yyyy-MM-dd")
+
+    val filteredTasks = tasks.filter { it.date == selectedDate }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text("Kalendarz", style = MaterialTheme.typography.titleMedium)
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Graficzny kalendarz
+        AndroidView(
+            factory = { context ->
+                CalendarView(context).apply {
+                    setOnDateChangeListener { _, year, month, dayOfMonth ->
+                        val cal = GregorianCalendar(year, month, dayOfMonth)
+                        selectedDate = sdf.format(cal.time)
+                    }
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 

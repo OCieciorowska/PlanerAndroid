@@ -7,5 +7,9 @@ data class Tasks(
     var date: String = "",       // YYYY-MM-DD
     var time: String = "",       // HH:MM
     var userId: String = "",
-    var isCompleted: Boolean = false
+    var isCompleted: Boolean = false,
+    //var isDone: Boolean = false
+
 )
+
+

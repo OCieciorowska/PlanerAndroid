@@ -62,10 +62,23 @@ fun TaskListScreen(navController: NavController, viewModel: PlanerViewModel) {
                                 .padding(8.dp)
                                 .clickable { viewModel.toggleTask(task) }
                         ) {
-                            Column(modifier = Modifier.padding(8.dp)) {
-                                Text(task.title)
-                                Text(task.description)
-                                Text("${task.date} ${task.time}")
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(task.title)
+                                    Text(task.description)
+                                    Text("${task.date} ${task.time}")
+                                }
+                                Checkbox(
+                                    checked = task.isCompleted,
+                                    onCheckedChange = {
+                                        viewModel.toggleTask(task)
+                                    }
+                                )
                             }
                         }
                     }
