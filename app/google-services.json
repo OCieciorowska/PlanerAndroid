@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "739705406476",
+    "project_id": "planer-9890b",
+    "storage_bucket": "planer-9890b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:739705406476:android:9acaf01d259e84c10bda29",
+        "android_client_info": {
+          "package_name": "com.example.planer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKnORxdEgN74cJ7HEKQ0cd70XqOBGKLEI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
