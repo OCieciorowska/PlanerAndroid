@@ -8,6 +8,8 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.text.SimpleDateFormat
+import java.util.Locale
 
 class PlanerViewModel : ViewModel() {
     private val db = Firebase.firestore
@@ -47,13 +49,22 @@ class PlanerViewModel : ViewModel() {
 
     fun addTask(title: String, desc: String, date: String, time: String) {
         val uid = auth.currentUser?.uid ?: return
-        val task = Tasks(title = title, description = desc, date = date, time = time, userId = uid)
+
+        val formattedDate = try {
+            SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).parse(date)
+                ?.let { SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(it) }
+        } catch (e: Exception) {
+            date // jeśli coś pójdzie nie tak, zapisuje oryginalną wartość
+        }
+
+        val task = Tasks(title = title, description = desc, date = formattedDate ?: date, time = time, userId = uid)
         val doc = db.collection("tasks").document()
         task.id = doc.id
         doc.set(task).addOnSuccessListener {
             loadTasks()
         }
     }
+
 
     fun loadTasks() {
         val uid = auth.currentUser?.uid ?: return

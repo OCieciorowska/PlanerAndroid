@@ -7,6 +7,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.DropdownMenuItem
@@ -15,6 +17,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 
 import android.app.DatePickerDialog
+import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.navigation.NavController
 
 import java.util.Calendar
@@ -52,15 +58,14 @@ fun AddTaskScreen(navController: NavController, viewModel: PlanerViewModel) {
 fun AddTaskScreen(navController: NavController, viewModel: PlanerViewModel) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-
-    // DATA
     var date by remember { mutableStateOf("") }
-    val context = LocalContext.current
-
-    // GODZINA
-    val hours = listOf("08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00")
+    var selectedTime by remember { mutableStateOf("00:00") }
     var expanded by remember { mutableStateOf(false) }
-    var selectedHour by remember { mutableStateOf(hours[0]) }
+
+    val context = LocalContext.current
+    val scrollState = rememberScrollState()
+
+    val hours = (0..23).map { hour -> String.format("%02d:00", hour) }
 
     val calendar = Calendar.getInstance()
     val datePickerDialog = DatePickerDialog(
@@ -73,32 +78,65 @@ fun AddTaskScreen(navController: NavController, viewModel: PlanerViewModel) {
         calendar.get(Calendar.DAY_OF_MONTH)
     )
 
-    Column(modifier = Modifier.padding(16.dp)) {
-        OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Tytuł") })
-        OutlinedTextField(value = description, onValueChange = { description = it }, label = { Text("Opis") })
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(scrollState)
+    ) {
+        OutlinedTextField(
+            value = title,
+            onValueChange = { title = it },
+            label = { Text("Tytuł") },
+            modifier = Modifier.fillMaxWidth()
+        )
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(onClick = { datePickerDialog.show() }) {
+        OutlinedTextField(
+            value = description,
+            onValueChange = { description = it },
+            label = { Text("Opis") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = { datePickerDialog.show() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text(if (date.isEmpty()) "Wybierz datę" else "Data: $date")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = !expanded }) {
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = !expanded }
+        ) {
             OutlinedTextField(
-                value = selectedHour,
+                value = selectedTime,
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Godzina") },
-                modifier = Modifier.menuAnchor()
+                modifier = Modifier
+                    .menuAnchor()
+                    .fillMaxWidth()
             )
-            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                hours.forEach { hour ->
+
+            DropdownMenu( // używamy DropdownMenu zamiast ExposedDropdownMenu!
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier
+                    .heightIn(max = 300.dp)
+                    .background(MaterialTheme.colorScheme.surface)
+            ) {
+                hours.forEach { time ->
                     DropdownMenuItem(
-                        text = { Text(hour) },
+                        text = { Text(time) },
                         onClick = {
-                            selectedHour = hour
+                            selectedTime = time
                             expanded = false
                         }
                     )
@@ -108,10 +146,17 @@ fun AddTaskScreen(navController: NavController, viewModel: PlanerViewModel) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        Button(onClick = {
-            viewModel.addTask(title, description, date, selectedHour)
-            navController.popBackStack()
-        }) {
+        Button(
+            onClick = {
+                if (title.isBlank() || description.isBlank() || date.isBlank() || selectedTime.isBlank()) {
+                    Toast.makeText(context, "Uzupełnij wszystkie pola", Toast.LENGTH_SHORT).show()
+                } else {
+                    viewModel.addTask(title, description, date, selectedTime)
+                    navController.popBackStack()
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Text("Dodaj zadanie")
         }
     }
