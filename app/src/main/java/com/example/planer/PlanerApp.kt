@@ -19,7 +19,7 @@ fun PlanerApp() {
     val viewModel = PlanerViewModel()
 
     Scaffold(
-        bottomBar = { BottomBar(navController) }
+        bottomBar = { BottomBar(navController, viewModel) }
     ) { innerPadding ->
         NavHost(
             navController = navController,

@@ -92,6 +92,11 @@ class PlanerViewModel : ViewModel() {
 
     }
 
+    fun logout() {
+        FirebaseAuth.getInstance().signOut()
+    }
+
+
 
 
 
