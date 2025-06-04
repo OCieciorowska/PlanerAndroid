@@ -17,8 +17,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 
 import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.navigation.NavController
@@ -54,20 +56,17 @@ fun AddTaskScreen(navController: NavController, viewModel: PlanerViewModel) {
         }
     }
 }*/
-
 fun AddTaskScreen(navController: NavController, viewModel: PlanerViewModel) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
-    var selectedTime by remember { mutableStateOf("00:00") }
-    var expanded by remember { mutableStateOf(false) }
+    var time by remember { mutableStateOf("") }
 
     val context = LocalContext.current
     val scrollState = rememberScrollState()
 
-    val hours = (0..23).map { hour -> String.format("%02d:00", hour) }
-
     val calendar = Calendar.getInstance()
+
     val datePickerDialog = DatePickerDialog(
         context,
         { _, year, month, day ->
@@ -76,6 +75,16 @@ fun AddTaskScreen(navController: NavController, viewModel: PlanerViewModel) {
         calendar.get(Calendar.YEAR),
         calendar.get(Calendar.MONTH),
         calendar.get(Calendar.DAY_OF_MONTH)
+    )
+
+    val timePickerDialog = TimePickerDialog(
+        context,
+        { _, hour: Int, minute: Int ->
+            time = "%02d:%02d".format(hour, minute)
+        },
+        calendar.get(Calendar.HOUR_OF_DAY),
+        calendar.get(Calendar.MINUTE),
+        true // 24-hour format
     )
 
     Column(
@@ -91,8 +100,6 @@ fun AddTaskScreen(navController: NavController, viewModel: PlanerViewModel) {
             modifier = Modifier.fillMaxWidth()
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
-
         OutlinedTextField(
             value = description,
             onValueChange = { description = it },
@@ -102,56 +109,24 @@ fun AddTaskScreen(navController: NavController, viewModel: PlanerViewModel) {
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        Button(
-            onClick = { datePickerDialog.show() },
-            modifier = Modifier.fillMaxWidth()
-        ) {
+        Button(onClick = { datePickerDialog.show() }) {
             Text(if (date.isEmpty()) "Wybierz datę" else "Data: $date")
         }
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = !expanded }
-        ) {
-            OutlinedTextField(
-                value = selectedTime,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Godzina") },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth()
-            )
-
-            DropdownMenu( // używamy DropdownMenu zamiast ExposedDropdownMenu!
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier
-                    .heightIn(max = 300.dp)
-                    .background(MaterialTheme.colorScheme.surface)
-            ) {
-                hours.forEach { time ->
-                    DropdownMenuItem(
-                        text = { Text(time) },
-                        onClick = {
-                            selectedTime = time
-                            expanded = false
-                        }
-                    )
-                }
-            }
+        Button(onClick = { timePickerDialog.show() }) {
+            Text(if (time.isEmpty()) "Wybierz godzinę" else "Godzina: $time")
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
             onClick = {
-                if (title.isBlank() || description.isBlank() || date.isBlank() || selectedTime.isBlank()) {
+                if (title.isBlank() || description.isBlank() || date.isBlank() || time.isBlank()) {
                     Toast.makeText(context, "Uzupełnij wszystkie pola", Toast.LENGTH_SHORT).show()
                 } else {
-                    viewModel.addTask(title, description, date, selectedTime)
+                    viewModel.addTask(title, description, date, time)
                     navController.popBackStack()
                 }
             },
