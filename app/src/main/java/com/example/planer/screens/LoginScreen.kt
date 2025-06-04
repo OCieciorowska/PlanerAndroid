@@ -52,11 +52,13 @@ fun LoginScreen(navController: NavController, viewModel: PlanerViewModel) {
                 } else {
                     viewModel.login(email, password) { success ->
                         if (success) {
+                            viewModel.loadTasks() // <- WAŻNE: Ładowanie tylko zadań zalogowanego użytkownika
                             navController.navigate("taskList")
                         } else {
                             Toast.makeText(context, "Logowanie nieudane", Toast.LENGTH_SHORT).show()
                         }
                     }
+
                 }
             },
             modifier = Modifier.fillMaxWidth()

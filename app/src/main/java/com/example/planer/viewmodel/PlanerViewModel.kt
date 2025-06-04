@@ -68,15 +68,14 @@ class PlanerViewModel : ViewModel() {
 
     fun loadTasks() {
         val uid = auth.currentUser?.uid ?: return
-        //db.collection("tasks").whereEqualTo("userId", uid).get().addOnSuccessListener { snapshot ->
-        //    val list = snapshot.documents.mapNotNull { it.toObject(Tasks::class.java) }
-        //    _tasks.value = list
-       // }
-        db.collection("tasks").get().addOnSuccessListener { snapshot ->
-            val list = snapshot.documents.mapNotNull { it.toObject(Tasks::class.java) }
-            _tasks.value = list
-        }
 
+        db.collection("tasks")
+            .whereEqualTo("userId", uid)
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val list = snapshot.documents.mapNotNull { it.toObject(Tasks::class.java) }
+                _tasks.value = list
+            }
     }
 
     fun toggleTask(task: Tasks) {
